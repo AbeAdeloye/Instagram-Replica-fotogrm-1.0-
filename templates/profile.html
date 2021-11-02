@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ profile.username }}</title>
+</head>
+<body>
+<div id="topnavbar" class="shadow">
+    <form id="search" action="POST"><input type="text" id="searchbar" placeholder="search"/></form>
+    <a href = "{% home %}"><img src="{% static home.png %}"></a>
+    <button class="profilebutton"><img src="{{ user.profic }}"/></button>
+</div>
+<div class="col-lg-12 col-md-12 col-sm-12">
+    <div id="profiletop">
+        <div id="profilepic"><img src="{{ profile.picture }}" alt="{{ profile.username }}'s picture"></div>
+        <div id="infocontainer"><div id="username">{{ profile.username }}</div></div>
+        {% if user.username == profile.username %}
+            {% if user.follows(profile) %}
+                <form method="post" action="{{ profileunfollow }}"><button id="unfollow">Unfollow</button></form>
+            {% else %}
+                <form method="post" action="{{ profilefollow }}"><button id="follow">Follow</button></form>
+            {% endif %}
+        {% endif %}
+        <div id="nl">
+            <div id="pinfotext">{{ profile.numposts }}</div>
+            <div id="pinfotext">{{ profile.numfollowers }}</div>
+            <div id="pinfotext">{{ profile.numfollowing }}</div>
+        </div>
+        <div id="bottomprofileinfo">
+            <div id="name">{{ profile.name }}</div>
+            <div id="bio">{{ profile.bio }}</div>
+        </div>
+    </div>
+
+    <div id="scroller" class="col-lg-5 col-md-8 col-sm-10 over">
+        {% for post in posts %}
+            <div class="card shadow brr" id = "{{ post.id }}">
+                <div class="topcontainer">
+                    <div class="postprofilepic"><img src = "{{ post.pp }}"/></div><div class="postprofilename"><a href="{{ './post.user' }}">{{ post.user }}</a></div>
+                </div>
+                <div class="imgcontainer">
+                    <img src="{{ post.pic }}" alt="{{ post.user }}'s post"/>
+                </div>
+                <div class="bottomcontainer">
+                    <div class="likecount">{{ post.likes }}</div>
+                    <div class="comments"></div>
+                </div>
+                <div class="comment">
+                    <form id="{{ post.id }}.comment" action="POST"></form>
+                </div>
+        </div>
+        <button id="loadmore" action="{{ loadmore }}">load more</button>
+    </div>
+</div>
+</body>
+</html>
