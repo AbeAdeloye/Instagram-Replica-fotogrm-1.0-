@@ -9,7 +9,8 @@
                 height: 40px;
                 width: 100vw;
                 background-color: white;
-                z-index: 5;
+                z-index: 10;
+                padding: 0.25%;
             }
             #searchbar{
             }
@@ -23,6 +24,12 @@
                 margin-right: auto;
                 margin-left: auto;
             }
+            .topcontainer{
+                padding-left: 2em;
+                padding-top: 1em;
+                height: 3em;
+                display: inline-block;
+            }
             .bottomcontainer{
                 margin: 10px;
                 border-bottom-color: #cccccc;
@@ -30,37 +37,82 @@
             .over{
                 overflow-y: scroll;
             }
+            .post{
+                co
+            }
+            .blk{
+                float: left;
+            }
+            .vertical-center {
+                margin:0;
+                position: absolute;
+                top: 50%;
+                -ms-transform: translateY(-50%);
+                transform: translateY(-50%);
+            }
+            img.Image { width: 100%;}
+            .imgcontainer {
+                width: calc(100%);
+            }
+            .nopad{
+                padding: 0px;
+                margin: 0px;
+            }
+            .mp-0 {
+                padding: 0px !important;
+}
+            .bb {
+                background-color: #fff;
+                border-bottom-width: 1px;
+                border-bottom-style: solid;
+                border-bottom-color: #cccccc;
+            }
+            .ah {
+                background-color: honeydew;
+            }
+            .cwhite {
+                background-color: white;
+            }
+}
         </style>
         <meta charset="UTF-8">
         <title>Title</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
 <body>
-<div id="topnavbar" class="shadow">
-    <form id="search" action="POST"><input type="text" id="searchbar" placeholder="search"/></form>
-    <a href = "{% home %}"><img src="{% static home.png %}"></a>
-    <button class="profilebutton"><img src="{% profilepic %}"/></button>
+<div id="topnavbar" class="bb row no-gutter">
+    <div class="col-4"></div>
+    <form id="search" action="POST" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
+    <a href = "{{ home }}"><img src="{{ pic }}">home</a>
+    <button class="profilebutton"><img src="/p/i/{{ uid }}"/></button>
 </div>
-<div class="col-lg-12 col-md-12 col-sm-12">
-    <div id="scroller" class="col-lg-5 col-md-8 col-sm-10 over">
+<div class="row no-gutter">
+<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
+    <div id="scroller" class="over">
         {% for post in posts %}
-            <div class="card shadow brr" id = "{{ post.id }}">
-                <div class="topcontainer">
-                    <div class="postprofilepic"><img src = "{{ post.pp }}"/></div><div class="postprofilename"><a href="{{ './post.user' }}">{{ post.user }}</a></div>
+            <div class="container shadow col-5 mp-0 g-0 cwhite" id = "{{ post }}">
+                <div class="topcontainer row">
+                    <div class="postprofilepic blk"><img src = "/p/i/{{ posts[post]['author'] }}"/></div><div class="postprofilename blk"><a href="/p/{{ posts[post]['author']  }}">{{ posts[post]['author']  }}</a></div>
                 </div>
-                <div class="imgcontainer">
-                    <img src="{{ post.pic }}" alt="{{ post.user }}'s post"/>
+                <div class="w-100 no-gutters row nopad">
+                    <img class="Image" src = "{{ posts[post]["pic"] }}" alt="sa post"/>
                 </div>
-                <div class="bottomcontainer">
-                    <div class="likecount">{{ post.likes }}</div>
-                    <div class="comments"></div>
+                <div class="bottomcontainer no-gutters">
+                    <div class="likecount">{{ posts[post]["likes"] }} likes</div>
+                    <div class="comments">
+                        {% for comment in posts[post]["comments"] %}
+                            {{ comment }} {{ posts[post]["comments"][comment] }}
+                        {% endfor %}
+                            </div>
                 </div>
                 <div class="comment">
-                    <form id="{{ post.id }}.comment" action="POST"></form>
+                    <form id=".comment" action="POST"></form>
                 </div>
         </div>
-        <button id="loadmore" action="{{ loadmore }}">load more</button>
+        {% endfor %}
+        <button id="loadmore" action="">load more</button>
     </div>
+</div>
 </div>
 
 
