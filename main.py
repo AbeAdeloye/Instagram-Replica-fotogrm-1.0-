@@ -112,27 +112,21 @@ def home():
     with ds.context():
         posts = post.query()
         for pos in posts:
-            aut = user.get_by_id(pos.author)
-            coms = {}
-            print(comments.get_by_id(pos.comments.get().key.id()))
-            if comments.get_by_id(pos.comments.get().key.id()) is not None:
-                for com in comments.get_by_id(pos.comments.id()):
-                    comauth = ds
-                    author = aut.username
-                    authorid = aut.id
-                    text = com.comment
-                    tstamp = com.timestamp
-            print(pos.key.id())
-            lks = likes.get_by_id(pos.likes.key.id())
-            print(likes.get_by_id(pos.likes.key.id()))
-            reconstructposts.update({pos: {"author": aut.username,
-                                           "comments": coms,
-                                           "timestamp": pos.timestamp,
-                                           "likes": lks.likecount,
-                                           "pic": pos.pic
-                                           }})
+            reconstructposts[pos.key.id()] = postfix(pos)
     print(reconstructposts)
+    if request.method=="POST":
+        with ds.context():
+            idd = request.form.get('custID')
+            comm = comments.get_by_id(id=idd)
 
+            commen = request.form.get("commen")
+            comma = comment(text=commen, author=uid, timestamp=datetime.datetime.now(tz=None))
+            if comm is None:
+                comm = comments(id=idd, comments=[comma])
+                comm.put()
+            else:
+                comm.comments.append(comma)
+                comm.put()
     return render_template('home.html', posts=reconstructposts)
 
 
@@ -150,11 +144,11 @@ def p():
             lid = likes.allocate_ids(size=1)[0].id()
             print(rid)
             fLink = uploadFile(file.get('file'), str(rid))
-            com = comments(cms=[], id=comid)
-            lk = likes(likecount=0, likers=[], id=lid)
+            com = comments(authors=[], texts=[], timestamps=[], id=rid)
+            lk = likes(likecount=0, likers=[], id=rid)
             pst = post(author=uid,
-                       comments=ndb.Key(comments, comid),
-                       likes=ndb.Key(likes, lid),
+                       comments=ndb.Key(comments, rid),
+                       likes=ndb.Key(likes, rid),
                        title=title,
                        pic=fLink,
                        timestamp=datetime.datetime.now(tz=None),
@@ -169,6 +163,56 @@ def p():
             upo.put()
     return render_template("post.html")
 
+def postfix(pos):
+    print(pos)
+    aut = user.get_by_id(pos.author)
+    coms = {}
+    pid = pos.key.id()
+    print(comments.get_by_id(id=str(pid)))
+    if comments.get_by_id(str(pid)) is not None:
+        i = 0
+        for comm in comments.get_by_id(str(pid)).comments:
+            print("ah")
+            print(comm)
+            authom = user.get_by_id(comm.author)
+            author = authom.username
+            authorid = comm.author
+            text = comm.text
+            tstamp = comm.timestamp
+            print(comm)
+            coms[i] = {"author": author, "uid": authorid, "text": text, "tstamp": tstamp}
+            i+=1
+    lks = likes.get_by_id(pos.likes.id())
+    return {"author": aut.username, "uid":pos.author, "comments": coms, "timestamp": pos.timestamp, "likes": lks.likecount,"pic": pos.pic}
+
+@app.route('/p/<uid>')
+def profilepage(uid):
+    with ds.context():
+        decoded_token = auth.verify_id_token(session['user'])
+        idd = decoded_token['uid']
+        us=user.get_by_id(idd)
+        profile = user.get_by_id(uid)
+        print(profile)
+        prfolw = followers.get_by_id(uid)
+        prfoli = followers.get_by_id(uid)
+        reconstructposts = {}
+        posts = post.query().filter(ndb.StringProperty("author") == uid)
+        print(posts)
+        for pos in posts:
+            reconstructposts[pos.key.id()] = postfix(pos)
+    return render_template('profile.html', profile=profile, followers = prfolw, following = prfoli, posts = reconstructposts, user = us)
+
+@app.route('/p/<uid>/followers')
+def proffollowers(uid):
+    f = followers.get_by_id(uid).f
+    f = f[0:100]
+    return render_template('followers.html', fo=f)
+
+@app.route('/user/<uid>/following')
+def proffollowing(uid):
+    f = following.get_by_id(uid).f
+    f = f[0:100]
+    return render_template('following.html', fo=f)
 
 @app.errorhandler(500)
 def server_error(e):
@@ -180,7 +224,7 @@ def server_error(e):
 
 
 def uploadFile(f, id):
-    blob = bucket.blob(id)
+    blob = bucket.blob(id+".png")
     blob.upload_from_file(f)
     return blob.public_url
 

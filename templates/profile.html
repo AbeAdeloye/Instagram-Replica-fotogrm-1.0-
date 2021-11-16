@@ -1,27 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+            .h100{
+
+            }
+            #topnavbar {
+                height: 40px;
+                width: 100vw;
+                background-color: white;
+                z-index: 10;
+                padding: 0.25%;
+            }
+            #searchbar{
+            }
+            .shadow{
+                box-shadow: 2px 2px 8px #555555;
+            }
+            .brr{
+                border-radius: 10px;
+            }
+            .mleft{
+                margin-right: auto;
+                margin-left: auto;
+            }
+            .topcontainer{
+                padding-left: 2em;
+                padding-top: 1em;
+                height: 3em;
+                display: inline-block;
+            }
+            .bottomcontainer{
+                margin: 10px;
+                border-bottom-color: #cccccc;
+            }
+            .over{
+                overflow-y: scroll;
+            }
+            .post{
+                co
+            }
+            .blk{
+                float: left;
+            }
+            .vertical-center {
+                margin:0;
+                position: absolute;
+                top: 50%;
+                -ms-transform: translateY(-50%);
+                transform: translateY(-50%);
+            }
+            img.Image { width: 100%;}
+            .imgcontainer {
+                width: calc(100%);
+            }
+            .nopad{
+                padding: 0px;
+                margin: 0px;
+            }
+            .mp-0 {
+                padding: 0px !important;
+}
+            .bb {
+                background-color: #fff;
+                border-bottom-width: 1px;
+                border-bottom-style: solid;
+                border-bottom-color: #cccccc;
+            }
+            .ah {
+                background-color: honeydew;
+            }
+            .cwhite {
+                background-color: white;
+            }
+    </style>
     <meta charset="UTF-8">
     <title>{{ profile.username }}</title>
-            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-<div id="topnavbar" class="shadow">
-    <form id="search" action="POST"><input type="text" id="searchbar" placeholder="search"/></form>
-    <a href = "{% home %}"><img src="{% static home.png %}"></a>
-    <button class="profilebutton"><img src="{{ user.profic }}"/></button>
-</div>
-<div class="col-lg-12 col-md-12 col-sm-12">
+<div id="topnavbar" class="bb row no-gutter">
+    <div class="col-4"></div>
+    <form id="search" action="POST" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
+    <a href = "{{ home }}"><img src="{{ pic }}">home</a>
+    <button class="profilebutton"><img src="/p/i/{{ uid }}"/></button>
+
+<div class="row no-gutter">
+<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
     <div id="profiletop">
         <div id="profilepic"><img src="{{ profile.picture }}" alt="{{ profile.username }}'s picture"></div>
         <div id="infocontainer"><div id="username">{{ profile.username }}</div></div>
-        {% if user.username == profile.username %}
-            {% if user.follows(profile) %}
-                <form method="post" action="{{ profileunfollow }}"><button id="unfollow">Unfollow</button></form>
-            {% else %}
-                <form method="post" action="{{ profilefollow }}"><button id="follow">Follow</button></form>
-            {% endif %}
-        {% endif %}
+
         <div id="nl">
             <div id="pinfotext">{{ profile.numposts }}</div>
             <div id="pinfotext">{{ profile.numfollowers }}</div>
@@ -35,23 +104,34 @@
 
     <div id="scroller" class="col-lg-5 col-md-8 col-sm-10 over">
         {% for post in posts %}
-            <div class="card shadow brr" id = "{{ post.id }}">
-                <div class="topcontainer">
-                    <div class="postprofilepic"><img src = "{{ post.pp }}"/></div><div class="postprofilename"><a href="{{ './post.user' }}">{{ post.user }}</a></div>
+            <div class="container shadow col-12 mp-0 g-0 cwhite" id = "{{ post }}">
+                <div class="topcontainer row">
+                    <div class="postprofilepic blk"><img src = "/p/i/{{ posts[post]['author'] }}"/></div><div class="postprofilename blk"><a href="/p/{{ posts[post]['author']  }}">{{ posts[post]['author']  }}</a></div>
                 </div>
-                <div class="imgcontainer">
-                    <img src="{{ post['container'] }}" alt="{{ post.user }}'s post"/>
+                <div class="w-100 no-gutters row nopad">
+                    <img class="Image" src = "{{ posts[post]["pic"] }}" alt="sa post"/>
                 </div>
-                <div class="bottomcontainer">
-                    <div class="likecount">{{ post.likes }}</div>
-                    <div class="comments"></div>
+                <div class="bottomcontainer no-gutters">
+                    <div class="likecount">{{ posts[post]["likes"] }} likes</div>
+                    <div class="comments">
+                        {% for comment in posts[post]["comments"] %}
+                            {{ comment }} {{ posts[post]["comments"][comment] }}
+                        {% endfor %}
+                            </div>
                 </div>
                 <div class="comment">
-                    <form id="{{ post.id }}.comment" action="POST"></form>
+                    <form id="comment" action="POST">
+                        <input type="hidden" id="{{ post }}.comment" name="{{ post }}comment" value="{{ post }}">
+                        <textarea class = "form-control mb-3" value ="" name ="comment"></textarea>
+                        <input type="submit" name="submit" class="btn btn-primary btn-block shadow mb-2">
+                    </form>
                 </div>
         </div>
+        {% endfor %}
         <button id="loadmore" action="{{ loadmore }}">load more</button>
     </div>
+</div>
+</div>
 
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

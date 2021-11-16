@@ -65,20 +65,18 @@ class likes(ndb.Model):
     likecount = ndb.IntegerProperty()
     likers = ndb.KeyProperty(repeated=True)
 
-
 class comment(ndb.Model):
     """
     Comment model.
-    Contains timestamp, comment, and author.
+    Contains structured property.
     """
-    timestamp = ndb.DateTimeProperty()
+    author = ndb.StringProperty()
     text = ndb.StringProperty()
-    author = ndb.KeyProperty()
-
+    timestamp = ndb.DateTimeProperty(default=datetime.datetime.now)
 
 class comments(ndb.Model):
     """
     Comments model.
     Contains structured property.
     """
-    cms = ndb.StructuredProperty(comment, repeated=True)
+    comments = ndb.StructuredProperty(comment, repeated=True)
