@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .bbottom{
+            border-bottom: #cccccc;
+            border-bottom-width: 1px;
+            height: 5em;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<div id="topnavbar" class="bb row no-gutter">
+    <div class="col-4"></div>
+    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
+    <a href = "/">home</a>
+    <a href = "/post">+</a>
+    <a href= "/p/{{ uid }}" class="profilebutton">profile</a>
+
+</div>
+<div class="col-8">
+    {% for user in results %}
+            <div class="row bbottom">
+            <a class="profilebutton" href="/p/{{ user['uid'] }}" value="profile" >{{ user['username'] }}</a>
+            </div>
+        </div>
+    {% endfor %}
+</body>
+</html>

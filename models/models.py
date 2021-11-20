@@ -25,7 +25,8 @@ class followers(ndb.Model):
     Followers model.
     Contains keys for followers.
     """
-    f = ndb.KeyProperty(repeated=True)
+    num = ndb.IntegerProperty()
+    f = ndb.StringProperty(repeated=True)
 
 
 class following(ndb.Model):
@@ -33,7 +34,8 @@ class following(ndb.Model):
     Following model.
     Contains keys for following.
     """
-    f = ndb.KeyProperty(repeated=True)
+    num=ndb.IntegerProperty()
+    f = ndb.StringProperty(repeated=True)
 
 
 class uposts(ndb.Model):
@@ -41,6 +43,7 @@ class uposts(ndb.Model):
     User posts model.
     Contains keys for a users posts.
     """
+    num = ndb.IntegerProperty()
     posts = ndb.KeyProperty(repeated=True)
 
 
@@ -63,7 +66,7 @@ class likes(ndb.Model):
     Contains likecount and likers.
     """
     likecount = ndb.IntegerProperty()
-    likers = ndb.KeyProperty(repeated=True)
+    likers = ndb.StringProperty(repeated=True)
 
 class comment(ndb.Model):
     """
@@ -79,4 +82,5 @@ class comments(ndb.Model):
     Comments model.
     Contains structured property.
     """
+    num = ndb.IntegerProperty()
     comments = ndb.StructuredProperty(comment, repeated=True)

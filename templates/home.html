@@ -80,10 +80,10 @@
     </head>
 <body>
 <div id="topnavbar" class="bb row no-gutter">
-    <div class="col-4"></div>
-    <form id="search" action="POST" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
-    <a href = "{{ home }}"><img src="{{ pic }}">home</a>
-    <button class="profilebutton"><img src="/p/i/{{ uid }}"/></button>
+    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
+    <a href = "/">home</a>
+    <a href = "/post">+</a>
+    <a href= "/p/{{ uid }}" class="profilebutton">profile</a>
 </div>
 <div class="row no-gutter">
 <div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
@@ -91,13 +91,17 @@
         {% for post in posts %}
             <div class="container shadow col-5 mp-0 g-0 cwhite" id = "{{ post }}">
                 <div class="topcontainer row">
-                    <div class="postprofilepic blk"><img src = "/p/i/{{ posts[post]['uid'] }}"/></div><div class="postprofilename blk"><a href="/p/{{ posts[post]['uid']  }}">{{ posts[post]['author']  }}</a></div>
+                    <div class="postprofilename blk"><a href="/p/{{ posts[post]['uid']  }}">{{ posts[post]['author']  }}</a></div>
                 </div>
                 <div class="w-100 no-gutters row nopad">
                     <img class="Image" src = "{{ posts[post]["pic"] }}" alt="sa post"/>
                 </div>
                 <div class="bottomcontainer no-gutters">
-                    <div class="likecount">{{ posts[post]["likes"] }} likes</div>
+                    <div class="likecount">{{ posts[post]["likes"] }} likes
+                        <form id="like" method="POST">
+                            <input type="hidden" id="custID" name="custID" value="{{ post }}.like">
+                            <input type="submit" name="like"></form>
+                    </div>
                     <div class="comments">
                         {{ posts[post]["comments"] }}
                         {% for comment in posts[post]["comments"] %}
@@ -107,7 +111,7 @@
                 </div>
                 <div class="comment">
                     <form id="comment" method="POST">
-                        <input type="hidden" id="custID" name="custID" value="{{ post }}">
+                        <input type="hidden" id="custID" name="custID" value="{{ post }}.comm">
                         <input type="text" class="form-control mb-3" value="" name="commen"/>
                         <input type="submit" name="submit" class="btn btn-primary btn-block shadow mb-2">
                     </form>
