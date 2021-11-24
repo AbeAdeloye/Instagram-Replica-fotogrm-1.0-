@@ -73,6 +73,9 @@
             .cwhite {
                 background-color: white;
             }
+            .ib{
+                display: inline-block;
+            }
     </style>
     <meta charset="UTF-8">
     <title>{{ profile.username }}</title>
@@ -88,20 +91,20 @@
 <div class="row no-gutter">
 <div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
     <div id="profiletop">
-        <div id="profilepic"><img src="{{ profile.picture }}" alt="{{ profile.username }}'s picture"></div>
         <div id="infocontainer"><div id="username">{{ profile.username }}</div></div>
-
         <div id="nl">
-            <div id="pinfotext">{{ numposts }} </div>
-            <div id="pinfotext">{{ followers }} <a href="/p/{{ pid }}/followers">followers</a></div>
-            <div id="pinfotext">{{ following }} <a href="/p/{{ pid }}/following">following</a></div>
+            <div id="pinfotext ib text-center">{{ numposts }} posts</div>
+            <div id="pinfotext ib text-center">{{ followers }} <a href="/p/{{ pid }}/followers">followers</a></div>
+            <div id="pinfotext ib text-center">{{ following }} <a href="/p/{{ pid }}/following">following</a></div>
         </div>
+        {% if foll %}
         <div class="follow">
             <form id="follow" method="POST">
                 <input type="hidden" id="custID" name="custID" value="follow">
-                <input type="submit" name="follow" value="follow">
+                <input type="submit" name="follow" value="{{ foll }}">
             </form>
         </div>
+        {% endif %}
         <div id="bottomprofileinfo">
             <div id="name">{{ profile.name }}</div>
             <div id="bio">{{ profile.bio }}</div>

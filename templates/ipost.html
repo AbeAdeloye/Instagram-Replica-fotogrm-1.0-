@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <style>
-            .h100{
+<head>
+    <style>
+                    .h100{
 
             }
             #topnavbar {
@@ -73,11 +73,11 @@
             .cwhite {
                 background-color: white;
             }
-        </style>
-        <meta charset="UTF-8">
-        <title>Title</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    </head>
+    </style>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <body>
 <div id="topnavbar" class="bb row no-gutter">
     <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
@@ -85,32 +85,25 @@
     <a href = "/post">+</a>
     <a href= "/p/{{ uid }}" class="profilebutton">profile</a>
 </div>
-<div class="row no-gutter">
-<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
-    <div id="scroller" class="over">
-        {% for post in posts %}
-            <div class="container shadow col-5 mp-0 g-0 cwhite" id = "{{ post }}">
-                <div class="topcontainer row">
-                    <div class="postprofilename blk"><a href="/p/{{ posts[post]['uid']  }}">{{ posts[post]['author']  }}</a></div>
+<div class="container shadow col-12 mp-0 g-0 cwhite row" id = "{{ post }}">
+                <div class="col-md-8 col-lg-8 no-gutters">
+                    <img class="Image" src = "{{ post["pic"] }}" alt="sa post"/>
                 </div>
-                <div class="w-100 no-gutters row nopad">
-                    <img class="Image" src = "{{ posts[post]["pic"] }}" alt="sa post"/>
+<div class="col-md-4 col-lg-4">
+    <div class="topcontainer row">
+        <div class="postprofilename blk"><a href="/p/{{ post['uid']  }}">{{ post['author']  }}</a></div>
                 </div>
                 <div class="bottomcontainer no-gutters">
-                    <div class="likecount">{{ posts[post]["likes"] }} likes
+                    <div class="likecount">{{ post["likes"] }} likes
                         <form id="like" method="POST">
                             <input type="hidden" id="custID" name="custID" value="{{ post }}.like">
-                            <input type="submit" name="like" value="Like"></form>
+                            <input type="submit" name="like"></form>
                     </div>
                     <div class="comments">
-                        {% for comment in posts[post]["comments"] %}
-                            <a href = "/p/{{posts[post]["comments"][comment]['uid']}}">{{ posts[post]["comments"][comment]['author']}}</a> {{ posts[post]["comments"][comment]['text']}}<br>
+                        {% for comment in post["comments"] %}
+                            <a href = "/p/{{post["comments"][comment]['uid']}}">{{ post["comments"][comment]['author']}}</a> {{ post["comments"][comment]['text']}}<br>
                         {% endfor %}
                             </div>
-                    {% if posts[post]['extend'] == True %}
-                        <a href="/i/{{ post }}">See more comments</a>
-                    {% endif %}
-
                 </div>
                 <div class="comment">
                     <form id="comment" method="POST">
@@ -119,13 +112,8 @@
                         <input type="submit" name="submit" class="btn btn-primary btn-block shadow mb-2">
                     </form>
                 </div>
-        </div>
-        {% endfor %}
-        <button id="loadmore" action="">load more</button>
-    </div>
 </div>
 </div>
-
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>

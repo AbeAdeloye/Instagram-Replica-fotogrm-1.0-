@@ -83,4 +83,4 @@ class comments(ndb.Model):
     Contains structured property.
     """
     num = ndb.IntegerProperty()
-    comments = ndb.StructuredProperty(comment, repeated=True)
+    comments = ndb.KeyProperty(repeated=True)

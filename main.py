@@ -43,7 +43,6 @@ ds = google.cloud.ndb.Client.from_service_account_json('keys/fotoadmin.json')
 dsa = datastore.Client.from_service_account_json('keys/fotoadmin.json')
 
 
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     message = "Check your credentials"
@@ -92,7 +91,6 @@ def search():
             usr = dsa.query(kind="username")
             usr.add_filter("username", "<", us)
 
-
             return render_template("search.html", results=usr.fetch())
 
 
@@ -125,15 +123,14 @@ def home():
     uid = decoded_token['uid']
     reconstructposts = {}
     with ds.context():
-
         foll = following.get_by_id(str(uid)).f
         print(foll)
         if len(foll) != 0:
-            quer = post.query().filter(post.author.IN(list(foll))).order(-post.timestamp).fetch()
+            quer = post.query().filter(post.author.IN(list(foll))).order(-post.timestamp).fetch(limit=50)
             for q in quer:
                 print(q)
             for pos in quer:
-                reconstructposts[pos.key.id()] = postfix(pos)
+                reconstructposts[pos.key.id()] = postfix(pos, 5)
     if request.method == "POST":
         with ds.context():
             idval = request.form.get('custID').split(".")
@@ -145,11 +142,12 @@ def home():
                 comm = comments.get_by_id(id=idd)
                 commen = request.form.get("commen")
                 comma = comment(text=commen, author=uid, timestamp=datetime.datetime.now(tz=None))
+                comma.put()
                 if comm is None:
-                    comm = comments(id=idd, comments=[comma])
+                    comm = comments(id=idd, comments=[comma.key])
                     comm.put()
                 else:
-                    comm.comments.append(comma)
+                    comm.comments.append(comma.key)
                     comm.put()
             else:
                 lk = likes.get_by_id(id=int(idd))
@@ -197,82 +195,121 @@ def p():
     return render_template("post.html")
 
 
-def postfix(pos):
+def postfix(pos, maxComments):
     aut = user.get_by_id(pos.author)
     coms = {}
     pid = pos.key.id()
+    extend = False
     if comments.get_by_id(str(pid)) is not None:
         i = 0
-        for comm in comments.get_by_id(str(pid)).comments:
-            authom = user.get_by_id(comm.author)
-            author = authom.username
-            authorid = comm.author
-            text = comm.text
-            tstamp = comm.timestamp
-            coms[i] = {"author": author, "uid": authorid, "text": text, "tstamp": tstamp}
-            i += 1
+        com = comment.query().filter(comment.key.IN(comments.get_by_id(str(pid)).comments)).order(
+            -post.timestamp).fetch(limit=maxComments + 1)
+        if len(com) > maxComments:
+            extend = True
+            for comm in range(maxComments):
+                authom = user.get_by_id(com[comm].author)
+                author = authom.username
+                authorid = com[comm].author
+                text = com[comm].text
+                tstamp = com[comm].timestamp
+                coms[i] = {"author": author, "uid": authorid, "text": text, "tstamp": tstamp}
+                i += 1
+        else:
+            for comm in range(len(com)):
+                authom = user.get_by_id(com[comm].author)
+                author = authom.username
+                authorid = com[comm].author
+                text = com[comm].text
+                tstamp = com[comm].timestamp
+                coms[i] = {"author": author, "uid": authorid, "text": text, "tstamp": tstamp}
+                i += 1
+        print(coms)
     lks = likes.get_by_id(pos.likes.id())
     return {"author": aut.username, "uid": pos.author, "comments": coms, "timestamp": pos.timestamp,
-            "likes": lks.likecount, "pic": pos.pic}
+            "likes": lks.likecount, "pic": pos.pic, "extend": extend}
 
 
-@app.route('/p/<uid>', methods=['GET','POST'])
+@app.route('/i/<pid>', methods=["GET", "POST"])
+def postpage(pid):
+    with ds.context():
+        decoded_token = auth.verify_id_token(session['user'])
+        idd = decoded_token['uid']
+        pos = postfix(post.get_by_id(int(pid)), 25)
+        return render_template("ipost.html", uid=idd, post=pos)
+
+
+@app.route('/p/<uid>', methods=['GET', 'POST'])
 def profilepage(uid):
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         idd = decoded_token['uid']
         us = user.get_by_id(idd)
         profile = user.get_by_id(uid)
-        flws = followers.get_by_id(uid)
-        flin = following.get_by_id(idd)
         prfolw = followers.get_by_id(uid).num
-        prfoli = followers.get_by_id(uid).num
+        prfoli = following.get_by_id(uid).num
         reconstructposts = {}
-        posts = post.query().filter(ndb.StringProperty("author") == uid).fetch()
+        posts = quer = post.query().filter(post.author == uid).order(-post.timestamp).fetch()
         totalposts = len(posts)
         for pos in posts:
-            reconstructposts[pos.key.id()] = postfix(pos)
-        if request.method=='POST':
-            if uid not in flws.get_by_id(uid).f:
+            reconstructposts[pos.key.id()] = postfix(pos, 5)
+        flws = followers.get_by_id(uid)
+        flin = following.get_by_id(idd)
+        if request.method == 'POST':
+            if idd not in flws.get_by_id(uid).f:
                 print("AHA")
                 flws.f.append(idd)
                 flin.f.append(uid)
                 flws.num += 1
                 flin.num += 1
             else:
-                if len(flws.get_by_id(uid).f)>0:
+                if len(flws.get_by_id(uid).f) > 0:
                     print("HAH")
                     flws.f.remove(idd)
                     flin.f.remove(uid)
                     flws.num -= 1
                     flin.num -= 1
-        flws.put()
-        flin.put()
-
-        return render_template('profile.html', profile=profile, pid=uid, numposts=totalposts, followers=prfolw,
-                           following=prfoli, posts=reconstructposts, user=us, uid=idd)
+            flws.put()
+            flin.put()
+        if uid == idd:
+            return render_template('profile.html', profile=profile, pid=uid, numposts=totalposts, followers=prfolw,
+                                   following=prfoli, posts=reconstructposts, user=us, uid=idd)
+        else:
+            if idd not in flws.get_by_id(uid).f:
+                foll = "Follow"
+            else:
+                foll = "Unfollow"
+            return render_template('profile.html', profile=profile, pid=uid, numposts=totalposts, followers=prfolw,
+                                   following=prfoli, posts=reconstructposts, user=us, uid=idd, foll=foll)
 
 
 @app.route('/p/<uid>/followers')
 def proffollowers(uid):
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
-        uid = decoded_token['uid']
+        idd = decoded_token['uid']
         f = followers.get_by_id(uid).f
-        uids = []
+        print(f)
         combined = {}
         i = 0
         for p in f:
             combined[i] = {'uid': p, 'uname': user.get_by_id(p).username}
+            i += 1
         return render_template('fol.html', results=combined, uid=uid)
 
 
-@app.route('/user/<uid>/following')
+@app.route('/p/<uid>/following')
 def proffollowing(uid):
-    decoded_token = auth.verify_id_token(session['user'])
-    uid = decoded_token['uid']
-    f = following.get_by_id(uid).f
-    return render_template('fol.html', results=f, uid=uid)
+    with ds.context():
+        decoded_token = auth.verify_id_token(session['user'])
+        idd = decoded_token['uid']
+        f = following.get_by_id(uid).f
+        combined = {}
+        i = 0
+        for p in f:
+            combined[i] = {'uid': p, 'uname': user.get_by_id(p).username}
+            i += 1
+        print(combined)
+        return render_template('fol.html', results=combined, uid=uid)
 
 
 @app.errorhandler(500)

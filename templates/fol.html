@@ -24,7 +24,7 @@
 <div class="col-8">
     {% for user in results %}
             <div class="row bbottom">
-            <a class="profilebutton" href="/p/{{ user['uid'] }}" value="profile" >{{ user['username'] }}</a>
+            <a href="/p/{{ results[user]['uid'] }}" value="profile" >{{ results[user]['uname'] }}</a>
             </div>
         </div>
     {% endfor %}
