@@ -73,6 +73,58 @@
             .cwhite {
                 background-color: white;
             }
+
+            .container{
+                background-color: black;
+                position: relative;
+            }
+            .container img{
+                display: block;
+                height: 100%;
+                object-fit: contain;
+
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+            }
+            #maxImgHeight{
+                height: calc(100vh - 40px);
+            }
+.box {
+  display: flex;
+  flex-flow: column;
+  height: calc(100% - 40px);
+}
+
+.box .row {
+  border: 1px dotted grey;
+}
+
+.box .row.header {
+  flex: 0 1 auto;
+  /* The above is shorthand for:
+  flex-grow: 0,
+  flex-shrink: 1,
+  flex-basis: auto
+  */
+}
+
+.box .row.content {
+  flex: 1 1 auto;
+}
+
+.box .row.footer {
+  flex: 0 1 auto;
+}
+                    .ib{
+                display: inline-block;
+            }
+        .nooutline{
+                outline: none;
+                border: none;
+                box-shadow: none;
+                padding: 1em 1em 1em 1em;
+        }
     </style>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -80,13 +132,13 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <body>
 <div id="topnavbar" class="bb row no-gutter">
-    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
+    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="q" class="form-control-sm form-control"></form>
     <a href = "/">home</a>
     <a href = "/post">+</a>
     <a href= "/p/{{ uid }}" class="profilebutton">profile</a>
 </div>
-<div class="container shadow col-12 mp-0 g-0 cwhite row" id = "{{ post }}">
-                <div class="col-md-8 col-lg-8 no-gutters">
+<div class="col-12 mp-0 g-0 cwhite row" id = "{{ post }}">
+                <div class="col-md-8 col-lg-8 container" id="maxImgHeight">
                     <img class="Image" src = "{{ post["pic"] }}" alt="sa post"/>
                 </div>
 <div class="col-md-4 col-lg-4">
@@ -94,12 +146,9 @@
         <div class="postprofilename blk"><a href="/p/{{ post['uid']  }}">{{ post['author']  }}</a></div>
                 </div>
                 <div class="bottomcontainer no-gutters">
-                    <div class="likecount">{{ post["likes"] }} likes
-                        <form id="like" method="POST">
-                            <input type="hidden" id="custID" name="custID" value="{{ post }}.like">
-                            <input type="submit" name="like"></form>
-                    </div>
-                    <div class="comments">
+                    <div class="likecount ib">{{ post["likes"] }} likes</div><div class="ib padl"><form id="like" method="POST"><input type="hidden" id="custID" name="custID" value="{{ post }}.like"><input type="submit" name="like" value="Like"></form></div>
+                    <div class="bb">{{ post["title"] }}</div>
+                    <div class="comments brr">
                         {% for comment in post["comments"] %}
                             <a href = "/p/{{post["comments"][comment]['uid']}}">{{ post["comments"][comment]['author']}}</a> {{ post["comments"][comment]['text']}}<br>
                         {% endfor %}
@@ -108,8 +157,7 @@
                 <div class="comment">
                     <form id="comment" method="POST">
                         <input type="hidden" id="custID" name="custID" value="{{ post }}.comm">
-                        <input type="text" class="form-control mb-3" value="" name="commen"/>
-                        <input type="submit" name="submit" class="btn btn-primary btn-block shadow mb-2">
+                        <input type="text" class="form-control mb-3 nooutline" value="" placeholder="comment" name="commen"/>
                     </form>
                 </div>
 </div>

@@ -34,11 +34,8 @@
                 margin: 10px;
                 border-bottom-color: #cccccc;
             }
-            .over{
+            .over {
                 overflow-y: scroll;
-            }
-            .post{
-                co
             }
             .blk{
                 float: left;
@@ -74,7 +71,28 @@
                 background-color: white;
             }
             .ib{
-                display: inline-block;
+                flex: auto;
+            }
+            .nooutline{
+                outline: none;
+                border: none;
+                box-shadow: none;
+                padding: 1em 1em 1em 1em;
+        }
+            .ov{
+                overflow: scroll;
+                max-height: 100vh;
+            }
+            .nl{
+                display: inline-flex;
+                flex-basis: fit-content;
+                flex-direction: row;
+            }
+            .fr{
+                float: right;
+            }
+            .ml{
+                margin-left: 10px;
             }
     </style>
     <meta charset="UTF-8">
@@ -84,35 +102,25 @@
 <body>
 <div id="topnavbar" class="bb row no-gutter">
     <div class="col-4"></div>
-    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
-    <a href = "/"><img src="{{ pic }}">home</a>
-    <a class="profilebutton" href="/p/{{ user.id }}" value="profile" ></a>
-
-<div class="row no-gutter">
-<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
-    <div id="profiletop">
-        <div id="infocontainer"><div id="username">{{ profile.username }}</div></div>
-        <div id="nl">
-            <div id="pinfotext ib text-center">{{ numposts }} posts</div>
-            <div id="pinfotext ib text-center">{{ followers }} <a href="/p/{{ pid }}/followers">followers</a></div>
-            <div id="pinfotext ib text-center">{{ following }} <a href="/p/{{ pid }}/following">following</a></div>
-        </div>
-        {% if foll %}
-        <div class="follow">
-            <form id="follow" method="POST">
-                <input type="hidden" id="custID" name="custID" value="follow">
-                <input type="submit" name="follow" value="{{ foll }}">
-            </form>
-        </div>
-        {% endif %}
-        <div id="bottomprofileinfo">
-            <div id="name">{{ profile.name }}</div>
-            <div id="bio">{{ profile.bio }}</div>
-        </div>
-    </div>
-</div>
+    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="q" class="form-control-sm form-control"></form>
+    <a href = "/" class="fr">home</a>  <a href = "/post" class="ml fr">+</a>  <a href= "/p/{{ user.id }}" class="profilebutton fr ml">profile</a>
 </div>
 <div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
+<div class="row">
+        <div id="infocontainer" class="col-lg-4 col-md-8 col-sm-12 mx-auto nl"><div id="username" class="ib">{{ profile.username }}</div>
+            {% if foll %}
+                <div class="follow ib">
+                    <form id="follow" method="POST">
+                        <input type="hidden" id="custID" name="custID" value="follow">
+                        <input type="submit" name="follow" value="{{ foll }}">
+                    </form>
+                </div>
+            {% endif %}
+            <div class="ib">{{ numposts }} posts</div><div class="ib">{{ followers }} <a href="/p/{{ pid }}/followers">followers</a></div><div class="ib">{{ following }} <a href="/p/{{ pid }}/following">following</a></div>
+        </div>
+</div>
+</div>
+<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter ov">
     <div id="scroller" class="over">
         {% for post in posts %}
             <div class="container shadow col-5 mp-0 g-0 cwhite" id = "{{ post }}">
@@ -122,24 +130,23 @@
                 <div class="w-100 no-gutters row nopad">
                     <img class="Image" src = "{{ posts[post]["pic"] }}" alt="sa post"/>
                 </div>
-                <div class="bottomcontainer no-gutters">
-                    <div class="likecount">{{ posts[post]["likes"] }} likes
-                        <form id="like" method="POST">
-                            <input type="hidden" id="custID" name="custID" value="{{ post }}.like">
-                            <input type="submit" name="like"></form>
-                    </div>
-                    <div class="comments">
-                        {{ posts[post]["comments"] }}
+                <div class="bottomcontainer">
+                    <div class="likecount ib">{{ posts[post]["likes"] }} likes</div><div class="ib padl"><form id="like" method="POST"><input type="hidden" id="custID" name="custID" value="{{ post }}.like"><input type="submit" name="like" value="Like"></form></div>
+                    <div class="bb">{{ posts[post]["title"] }}</div>
+                    <div class="comments brr">
                         {% for comment in posts[post]["comments"] %}
-                            {{ comment }} {{ posts[post]["comments"][comment] }}
+                            <a href = "/p/{{posts[post]["comments"][comment]['uid']}}">{{ posts[post]["comments"][comment]['author']}}</a> {{ posts[post]["comments"][comment]['text']}}<br>
                         {% endfor %}
                             </div>
+                    {% if posts[post]['extend'] == True %}
+                        <a href="/i/{{ post }}">See more comments</a>
+                    {% endif %}
+
                 </div>
                 <div class="comment">
                     <form id="comment" method="POST">
                         <input type="hidden" id="custID" name="custID" value="{{ post }}.comm">
-                        <input type="text" class="form-control mb-3" value="" name="commen"/>
-                        <input type="submit" name="submit" class="btn btn-primary btn-block shadow mb-2">
+                        <input type="text" class="form-control mb-3 nooutline" value="" placeholder="comment" name="commen"/>
                     </form>
                 </div>
         </div>

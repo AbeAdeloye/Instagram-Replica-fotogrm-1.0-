@@ -73,20 +73,41 @@
             .cwhite {
                 background-color: white;
             }
+            .ib{
+                display: inline-block;
+            }
+            .padl{
+                margin-left: 0.5em;
+            }
+            .nooutline{
+                outline: none;
+                border: none;
+                box-shadow: none;
+                padding: 1em 1em 1em 1em;
+            }
+            .ov{
+                overflow: scroll;
+                max-height: 100vh;
+            }
+            .fr{
+                float: right;
+            }
+            .ml{
+                margin-left: 10px;
+            }
         </style>
         <meta charset="UTF-8">
-        <title>Title</title>
+        <title>Home</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
 <body>
 <div id="topnavbar" class="bb row no-gutter">
-    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
-    <a href = "/">home</a>
-    <a href = "/post">+</a>
-    <a href= "/p/{{ uid }}" class="profilebutton">profile</a>
+    <div class="col-4"></div>
+    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="q" class="form-control-sm form-control"></form>
+    <a href = "/" class="fr">home</a>  <a href = "/post" class="ml fr">+</a>  <a href= "/p/{{ uid }}" class="profilebutton fr ml">profile</a>
 </div>
 <div class="row no-gutter">
-<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter">
+<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter ov">
     <div id="scroller" class="over">
         {% for post in posts %}
             <div class="container shadow col-5 mp-0 g-0 cwhite" id = "{{ post }}">
@@ -96,13 +117,10 @@
                 <div class="w-100 no-gutters row nopad">
                     <img class="Image" src = "{{ posts[post]["pic"] }}" alt="sa post"/>
                 </div>
-                <div class="bottomcontainer no-gutters">
-                    <div class="likecount">{{ posts[post]["likes"] }} likes
-                        <form id="like" method="POST">
-                            <input type="hidden" id="custID" name="custID" value="{{ post }}.like">
-                            <input type="submit" name="like" value="Like"></form>
-                    </div>
-                    <div class="comments">
+                <div class="bottomcontainer">
+                    <div class="likecount ib">{{ posts[post]["likes"] }} likes</div><div class="ib padl"><form id="like" method="POST"><input type="hidden" id="custID" name="custID" value="{{ post }}.like"><input type="submit" name="like" value="Like"></form></div>
+                    <div class="bb">{{ posts[post]["title"] }}</div>
+                    <div class="comments brr">
                         {% for comment in posts[post]["comments"] %}
                             <a href = "/p/{{posts[post]["comments"][comment]['uid']}}">{{ posts[post]["comments"][comment]['author']}}</a> {{ posts[post]["comments"][comment]['text']}}<br>
                         {% endfor %}
@@ -115,8 +133,7 @@
                 <div class="comment">
                     <form id="comment" method="POST">
                         <input type="hidden" id="custID" name="custID" value="{{ post }}.comm">
-                        <input type="text" class="form-control mb-3" value="" name="commen"/>
-                        <input type="submit" name="submit" class="btn btn-primary btn-block shadow mb-2">
+                        <input type="text" class="form-control mb-3 nooutline" value="" placeholder="comment" name="commen"/>
                     </form>
                 </div>
         </div>

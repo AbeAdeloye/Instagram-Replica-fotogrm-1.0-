@@ -5,6 +5,7 @@
         .loginform{
             height: 40vh;
             padding: 5em;
+            margin: auto;
         }
         .shadow{
             box-shadow: 2px 2px 4px #555555;
@@ -16,7 +17,7 @@
 </head>
 <body>
 <div class="row align-items-center">
-    <div class="card shadow col-sm-12 col-md-4 col-lg-4 loginform align-items-center">
+    <div class="card shadow col-sm-12 col-md-4 col-lg-4 col-lg-offset-4 col-md-offset-4 loginform">
     {% if message %}
         <div class="errormessage">{{ message }}</div>
     {% endif %}

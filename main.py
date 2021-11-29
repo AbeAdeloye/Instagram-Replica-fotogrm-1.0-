@@ -1,16 +1,18 @@
 import json
 import logging
-from flask import Flask, render_template, redirect, url_for, session
-from google.cloud import datastore
-from flask import request
-import flask
-import google.cloud.datastore.client
 import requests
 
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
+from flask import Flask, render_template, session, request
+import flask
+
+from google.cloud import datastore
 from google.cloud import ndb
 from google.cloud import storage
+import google.cloud.datastore.client
+
+import firebase_admin
+from firebase_admin import credentials, auth
+
 import datetime
 from models.models import user, following, followers, post, likes, comments, uposts, comment
 
@@ -33,18 +35,18 @@ app.secret_key = 'supersecret'
 app.config['SESSION_TYPE'] = 'filesystem'
 credential = credentials.Certificate("keys/firebase.json")
 firebase = firebase_admin.initialize_app(credential)
-
 storageClient = storage.Client.from_service_account_json('keys/fotoadmin.json')
 bucket = storageClient.get_bucket("foto-334006.appspot.com")
-
-ddb = firestore.client()
-
 ds = google.cloud.ndb.Client.from_service_account_json('keys/fotoadmin.json')
 dsa = datastore.Client.from_service_account_json('keys/fotoadmin.json')
 
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    """
+    Signin routing and methods
+    :return:
+    """
     message = "Check your credentials"
     if request.method == "POST":
         email = request.form['email']
@@ -59,10 +61,10 @@ def signup():
             uid = user_record.uid
             with ds.context():  # <- you need this line
                 flr = followers(f=[], id=uid)
-                flr.put()
                 fli = following(f=[], id=uid)
-                fli.put()
                 up = uposts(posts=[], id=uid)
+                flr.put()
+                fli.put()
                 up.put()
                 usr = user(email=email,
                            bio="",
@@ -74,30 +76,19 @@ def signup():
                            ppic="",
                            id=uid)
                 usr.put()
-            print('Sucessfully created new user: {0}'.format(uid))
-            return render_template("signup.html", message="Successfully created user, {user.uid}", action="/signin")
         except Exception as e:
             print(e)
             return render_template("signup.html", message="Error creating template", action="/signup")
     return render_template("signup.html", action="/signup")
 
 
-@app.route('/search', methods=["GET", "POST"])
-def search():
-    print("ah")
-    if request.method == "GET":
-        us = request.form.get('search')
-        with ds.context():
-            usr = dsa.query(kind="username")
-            usr.add_filter("username", "<", us)
-
-            return render_template("search.html", results=usr.fetch())
-
-
 @app.route('/signin', methods=["GET", "POST"])
 def signin():
+    """
+    Signin routing and methods
+    Renders signin template and signs in a user.
+    """
     if request.method == "POST":
-
         email = request.form['email']
         password = request.form['password']
         print(email)
@@ -105,11 +96,8 @@ def signin():
         if email is None or password is None:
             return render_template("signin.html", message="Error missing email or password", action="/signin")
         try:
-            user = sign_in_with_email_and_password(email=email, password=password)
-            print(user)
-            token = user['idToken']
-            session['user'] = token
-            print(token)
+            us = sign_in_with_email_and_password(email=email, password=password)
+            session['user'] = us['idToken']
             return flask.redirect("/")
         except Exception as e:
             print(e)
@@ -117,8 +105,26 @@ def signin():
     return render_template("signin.html")
 
 
+@app.route('/search', methods=["GET", "POST"])
+def search():
+    """
+    Searches the database for users that start with what's queried.
+    :return:
+    """
+    if request.method == "GET":
+        us = request.values.get('q')
+        print(request.values)
+        with ds.context():
+            usr = user.query().filter(user.username >= us).filter(user.username < str(us+"\ufffd"))
+            return render_template("search.html", results=usr.fetch())
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    """
+    Homepage routing and methods
+    Renders template home.html
+    """
     decoded_token = auth.verify_id_token(session['user'])
     uid = decoded_token['uid']
     reconstructposts = {}
@@ -165,6 +171,10 @@ def home():
 
 @app.route("/post", methods=['GET', 'POST'])
 def p():
+    """
+    Posting methods and routing
+    Gets file and uploads
+    """
     if request.method == "POST":
         title = request.form['title']
         file = request.files
@@ -196,6 +206,11 @@ def p():
 
 
 def postfix(pos, maxComments):
+    """
+    :param pos:
+    :param maxComments:
+    :return fixed post (all queries worked out):
+    """
     aut = user.get_by_id(pos.author)
     coms = {}
     pid = pos.key.id()
@@ -204,42 +219,74 @@ def postfix(pos, maxComments):
         i = 0
         com = comment.query().filter(comment.key.IN(comments.get_by_id(str(pid)).comments)).order(
             -post.timestamp).fetch(limit=maxComments + 1)
+        rng = 0
         if len(com) > maxComments:
             extend = True
-            for comm in range(maxComments):
-                authom = user.get_by_id(com[comm].author)
-                author = authom.username
-                authorid = com[comm].author
-                text = com[comm].text
-                tstamp = com[comm].timestamp
-                coms[i] = {"author": author, "uid": authorid, "text": text, "tstamp": tstamp}
-                i += 1
+            rng = maxComments
         else:
-            for comm in range(len(com)):
-                authom = user.get_by_id(com[comm].author)
-                author = authom.username
-                authorid = com[comm].author
-                text = com[comm].text
-                tstamp = com[comm].timestamp
-                coms[i] = {"author": author, "uid": authorid, "text": text, "tstamp": tstamp}
-                i += 1
+            rng = len(com)
+        for comm in range(rng):
+            authom = user.get_by_id(com[comm].author)
+            author = authom.username
+            authorid = com[comm].author
+            text = com[comm].text
+            tstamp = com[comm].timestamp
+            coms[i] = {"author": author, "uid": authorid, "text": text, "tstamp": tstamp}
+            i += 1
         print(coms)
     lks = likes.get_by_id(pos.likes.id())
-    return {"author": aut.username, "uid": pos.author, "comments": coms, "timestamp": pos.timestamp,
+    return {"author": aut.username, "title": pos.title, "uid": pos.author, "comments": coms, "timestamp": pos.timestamp,
             "likes": lks.likecount, "pic": pos.pic, "extend": extend}
 
 
 @app.route('/i/<pid>', methods=["GET", "POST"])
 def postpage(pid):
+    """
+    Post page method
+    :param pid:
+    :return rendered template:
+    """
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
-        idd = decoded_token['uid']
+        uid = decoded_token['uid']
+        if request.method == 'POST':
+            idval = request.form.get('custID').split(".")
+            idd = str(idval[0])
+            typ = idval[1]
+            print(idd)
+            print(typ)
+            if typ == "comm":
+                comm = comments.get_by_id(id=idd)
+                commen = request.form.get("commen")
+                comma = comment(text=commen, author=uid, timestamp=datetime.datetime.now(tz=None))
+                comma.put()
+                if comm is None:
+                    comm = comments(id=idd, comments=[comma.key])
+                    comm.put()
+                else:
+                    comm.comments.append(comma.key)
+                    comm.put()
+            else:
+                lk = likes.get_by_id(id=int(idd))
+                print(lk)
+                if uid in lk.likers:
+                    lk.likers.remove(uid)
+                    lk.likecount -= 1
+                else:
+                    lk.likers.append(uid)
+                    lk.likecount += 1
+                lk.put()
         pos = postfix(post.get_by_id(int(pid)), 25)
         return render_template("ipost.html", uid=idd, post=pos)
 
 
 @app.route('/p/<uid>', methods=['GET', 'POST'])
 def profilepage(uid):
+    """
+    Profile Page
+    :param uid:
+    :return rendered template of profile.html:
+    """
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         idd = decoded_token['uid']
@@ -255,6 +302,34 @@ def profilepage(uid):
         flws = followers.get_by_id(uid)
         flin = following.get_by_id(idd)
         if request.method == 'POST':
+            idval = request.form.get('custID').split(".")
+            if idval is not None:
+                idd = str(idval[0])
+                typ = idval[1]
+                print(idd)
+                print(typ)
+                if typ == "comm":
+                    comm = comments.get_by_id(id=idd)
+                    commen = request.form.get("commen")
+                    comma = comment(text=commen, author=uid, timestamp=datetime.datetime.now(tz=None))
+                    comma.put()
+                    if comm is None:
+                        comm = comments(id=idd, comments=[comma.key])
+                        comm.put()
+                    else:
+                        comm.comments.append(comma.key)
+                        comm.put()
+                else:
+                    lk = likes.get_by_id(id=int(idd))
+                    print(lk)
+                    if uid in lk.likers:
+                        lk.likers.remove(uid)
+                        lk.likecount -= 1
+                    else:
+                        lk.likers.append(uid)
+                        lk.likecount += 1
+                    lk.put()
+
             if idd not in flws.get_by_id(uid).f:
                 print("AHA")
                 flws.f.append(idd)
@@ -284,14 +359,19 @@ def profilepage(uid):
 
 @app.route('/p/<uid>/followers')
 def proffollowers(uid):
+    """
+    Gets the page for followers for a user
+    :param uid:
+    :return:
+    """
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         idd = decoded_token['uid']
         f = followers.get_by_id(uid).f
-        print(f)
         combined = {}
         i = 0
         for p in f:
+            print(p)
             combined[i] = {'uid': p, 'uname': user.get_by_id(p).username}
             i += 1
         return render_template('fol.html', results=combined, uid=uid)
@@ -299,13 +379,20 @@ def proffollowers(uid):
 
 @app.route('/p/<uid>/following')
 def proffollowing(uid):
+    """
+    Gets the page for users a user follows
+    :param uid:
+    :return:
+    """
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         idd = decoded_token['uid']
         f = following.get_by_id(uid).f
         combined = {}
         i = 0
+
         for p in f:
+
             combined[i] = {'uid': p, 'uname': user.get_by_id(p).username}
             i += 1
         print(combined)
@@ -314,6 +401,11 @@ def proffollowing(uid):
 
 @app.errorhandler(500)
 def server_error(e):
+    """
+    Handles 500 error
+    :param e:
+    :return:
+    """
     logging.exception('An error occurred during a request.')
     return """ 
     An internal error occurred: <pre>{}</pre>
@@ -321,22 +413,53 @@ def server_error(e):
     """.format(e), 500
 
 
+@app.errorhandler(404)
+def server_error(e):
+    """
+    Handles 404 error
+    :param e:
+    :return:
+    """
+    logging.exception('Page not found')
+    return """ 
+    An internal error occurred: <pre>{}</pre>
+    See logs for full stacktrace.
+    """.format(e), 404
+
+
 def uploadFile(f, id):
+    """
+    Uploads file
+    :param f:
+    :param id:
+    :return url:
+    """
     blob = bucket.blob(id + ".png")
     blob.upload_from_file(f)
     return blob.public_url
 
 
 def sign_in_with_email_and_password(email, password):
-    request_ref = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={0}".format(api_key)
+    """
+    Gets auth token.
+    :param email:
+    :param password:
+    :return:
+    """
+    req = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={0}".format(api_key)
     headers = {"content-type": "application/json; charset=UTF-8"}
     data = json.dumps({"email": email, "password": password, "returnSecureToken": True})
-    request_object = requests.post(request_ref, headers=headers, data=data)
-    raise_detailed_error(request_object)
-    return request_object.json()
+    reques = requests.post(req, headers=headers, data=data)
+    raise_error(reques)
+    return reques.json()
 
 
-def raise_detailed_error(request_object):
+def raise_error(request_object):
+    """
+    Raises error
+    :param request_object:
+    :return:
+    """
     try:
         request_object.raise_for_status()
     except requests.HTTPError as e:

@@ -2,11 +2,17 @@
 <html lang="en">
 <head>
     <style>
-        .bbottom{
+        .bb{
             border-bottom: #cccccc;
             border-bottom-width: 1px;
             height: 5em;
         }
+        .fr{
+            float: right;
+            }
+        .ml{
+            margin-left: 10px;
+            }
     </style>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -15,15 +21,13 @@
 <body>
 <div id="topnavbar" class="bb row no-gutter">
     <div class="col-4"></div>
-    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="search" class="form-control-sm form-control"></form>
-    <a href = "/">home</a>
-    <a href = "/post">+</a>
-    <a href= "/p/{{ uid }}" class="profilebutton">profile</a>
-
+    <form id="search" action="/search" method="GET" class="col-4 small"><input type="search" name="q" class="form-control-sm form-control"></form>
+    <a href = "/" class="fr">home</a>  <a href = "/post" class="ml fr">+</a>  <a href= "/p/{{ uid }}" class="profilebutton fr ml">profile</a>
 </div>
-<div class="col-8">
+<div class="col-12">
+<div class="col-4"></div>
     {% for user in results %}
-            <div class="row bbottom">
+            <div class="row bb">
             <a href="/p/{{ results[user]['uid'] }}" value="profile" >{{ results[user]['uname'] }}</a>
             </div>
         </div>

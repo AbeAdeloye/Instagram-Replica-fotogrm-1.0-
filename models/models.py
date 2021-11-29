@@ -1,7 +1,4 @@
 import datetime
-
-from firebase_admin import db
-from flask_bcrypt import generate_password_hash
 from google.cloud import ndb
 
 
@@ -34,7 +31,7 @@ class following(ndb.Model):
     Following model.
     Contains keys for following.
     """
-    num=ndb.IntegerProperty()
+    num = ndb.IntegerProperty()
     f = ndb.StringProperty(repeated=True)
 
 
@@ -52,7 +49,7 @@ class post(ndb.Model):
     Post model.
     Contains timestamp, author, photoID, likes, and comments.
     """
-    title=ndb.StringProperty()
+    title = ndb.StringProperty()
     timestamp = ndb.DateTimeProperty(default=datetime.datetime.now)
     author = ndb.StringProperty()
     pic = ndb.StringProperty()
@@ -68,6 +65,7 @@ class likes(ndb.Model):
     likecount = ndb.IntegerProperty()
     likers = ndb.StringProperty(repeated=True)
 
+
 class comment(ndb.Model):
     """
     Comment model.
@@ -76,6 +74,7 @@ class comment(ndb.Model):
     author = ndb.StringProperty()
     text = ndb.StringProperty()
     timestamp = ndb.DateTimeProperty(default=datetime.datetime.now)
+
 
 class comments(ndb.Model):
     """
