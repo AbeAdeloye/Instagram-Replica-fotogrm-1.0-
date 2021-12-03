@@ -20,8 +20,9 @@
     <a href = "/post">+</a>
     <a href= "/p/{{ uid }}" class="profilebutton">profile</a>
 </div>
-<div class="col-12">
-<div class="col-4"></div>
+<div class="row no-gutter">
+<div class="col-lg-12 col-md-12 col-sm-12 ah no-gutter ov">
+    <div id="scroller" class="over">
     {% for user in results %}
             <div class="bb">
             <a class="profilebutton" href="/p/{{ user.key.id() }}" value="profile" >{{ user.username }}</a>
@@ -29,5 +30,6 @@
 
     {% endfor %}
         </div>
+</div></div>
 </body>
 </html>

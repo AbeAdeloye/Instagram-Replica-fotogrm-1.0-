@@ -10,6 +10,11 @@
         .shadow{
             box-shadow: 2px 2px 4px #555555;
         }
+        .mg{
+            position: absolute;
+            top: 20vh;
+            margin: 0 auto;
+        }
     </style>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -17,13 +22,13 @@
 </head>
 <body>
 <div class="row align-items-center">
-    <div class="card shadow col-sm-12 col-md-4 col-lg-4 col-lg-offset-4 col-md-offset-4 loginform">
+    <div class="card shadow col-sm-12 col-md-4 col-lg-4 col-lg-offset-4 col-md-offset-4 loginform mg">
     {% if message %}
         <div class="errormessage">{{ message }}</div>
     {% endif %}
-        <form action="{{ action }}" method="POST" class="col-sm-10 col-md-10 col-lg-10">
-            <input type="email" name="email" class="form-control mb-3">
-            <input type="password" name="password" class="form-control mb-3">
+        <form action="{{ action }}" method="POST">
+            <input type="email" name="email" placeholder="email" class="form-control mb-3">
+            <input type="password" name="password" placeholder="password" class="form-control mb-3">
             <input type="submit" name="submit" class="btn btn-primary btn-block shadow mb-2">
         </form>
     </div>

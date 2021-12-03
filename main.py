@@ -2,7 +2,7 @@ import json
 import logging
 import requests
 
-from flask import Flask, render_template, session, request
+from flask import Flask, render_template, session, request, redirect
 import flask
 
 from google.cloud import datastore
@@ -59,6 +59,7 @@ def signup():
         try:
             user_record = auth.create_user(email=email, password=password)
             uid = user_record.uid
+            print(uid)
             with ds.context():  # <- you need this line
                 flr = followers(f=[], id=uid)
                 fli = following(f=[], id=uid)
@@ -76,6 +77,8 @@ def signup():
                            ppic="",
                            id=uid)
                 usr.put()
+                print(usr)
+                return redirect("/signin")
         except Exception as e:
             print(e)
             return render_template("signup.html", message="Error creating template", action="/signup")
@@ -129,42 +132,46 @@ def home():
     uid = decoded_token['uid']
     reconstructposts = {}
     with ds.context():
-        foll = following.get_by_id(str(uid)).f
-        print(foll)
-        if len(foll) != 0:
-            quer = post.query().filter(post.author.IN(list(foll))).order(-post.timestamp).fetch(limit=50)
-            for q in quer:
-                print(q)
-            for pos in quer:
-                reconstructposts[pos.key.id()] = postfix(pos, 5)
+        followi = following.get_by_id(str(uid))
+        if followi is not None:
+            foll = followi.f
+            print(foll)
+            if len(foll) != 0:
+                quer = post.query().filter(post.author.IN(list(foll))).order(-post.timestamp).fetch(limit=50)
+                for q in quer:
+                    print(q)
+                for pos in quer:
+                    reconstructposts[pos.key.id()] = postfix(pos, 5)
     if request.method == "POST":
         with ds.context():
-            idval = request.form.get('custID').split(".")
-            idd = str(idval[0])
-            typ = idval[1]
-            print(idd)
-            print(typ)
-            if typ == "comm":
-                comm = comments.get_by_id(id=idd)
-                commen = request.form.get("commen")
-                comma = comment(text=commen, author=uid, timestamp=datetime.datetime.now(tz=None))
-                comma.put()
-                if comm is None:
-                    comm = comments(id=idd, comments=[comma.key])
-                    comm.put()
+            idval = request.form.get('custID')
+            if idval is not None:
+                idval = idval.split(".")
+                idd = str(idval[0])
+                typ = idval[1]
+                print(idd)
+                print(typ)
+                if typ == "comm":
+                    comm = comments.get_by_id(id=idd)
+                    commen = request.form.get("commen")
+                    comma = comment(text=commen, author=uid, timestamp=datetime.datetime.now(tz=None))
+                    comma.put()
+                    if comm is None:
+                        comm = comments(id=idd, comments=[comma.key])
+                        comm.put()
+                    else:
+                        comm.comments.append(comma.key)
+                        comm.put()
                 else:
-                    comm.comments.append(comma.key)
-                    comm.put()
-            else:
-                lk = likes.get_by_id(id=int(idd))
-                print(lk)
-                if uid in lk.likers:
-                    lk.likers.remove(uid)
-                    lk.likecount -= 1
-                else:
-                    lk.likers.append(uid)
-                    lk.likecount += 1
-                lk.put()
+                    lk = likes.get_by_id(id=int(idd))
+                    print(lk)
+                    if uid in lk.likers:
+                        lk.likers.remove(uid)
+                        lk.likecount -= 1
+                    else:
+                        lk.likers.append(uid)
+                        lk.likecount += 1
+                    lk.put()
 
     return render_template('home.html', posts=reconstructposts, uid=uid)
 
