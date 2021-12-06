@@ -16,29 +16,20 @@ from firebase_admin import credentials, auth
 import datetime
 from models.models import user, following, followers, post, likes, comments, uposts, comment
 
-config = {
-    "apiKey": "AIzaSyATS5J03pAt_LJliBweODydObkCpWTuBJc",
-    "authDomain": "social-333902.firebaseapp.com",
-    "projectId": "social-333902",
-    "storageBucket": "social-333902.appspot.com",
-    "messagingSenderId": "410902085253",
-    "databaseURL": "/",
-    "appId": "1:410902085253:web:0cf2c09d952e7eaae2b3ec",
-    "measurementId": "G-QXFW1LCKY3"
-};
 api_key = "AIzaSyATS5J03pAt_LJliBweODydObkCpWTuBJc"
-
 app = Flask(__name__,
             static_folder='/static',
             template_folder='templates')
 app.secret_key = 'supersecret'
 app.config['SESSION_TYPE'] = 'filesystem'
-credential = credentials.Certificate("keys/firebase.json")
-firebase = firebase_admin.initialize_app(credential)
-storageClient = storage.Client.from_service_account_json('keys/fotoadmin.json')
-bucket = storageClient.get_bucket("foto-334006.appspot.com")
+
+firebase = firebase_admin.initialize_app(credentials.Certificate("keys/firebase.json"))
+
 ds = google.cloud.ndb.Client.from_service_account_json('keys/fotoadmin.json')
 dsa = datastore.Client.from_service_account_json('keys/fotoadmin.json')
+storageClient = storage.Client.from_service_account_json('keys/fotoadmin.json')
+
+bucket = storageClient.get_bucket("foto-334006.appspot.com")
 
 
 @app.route('/signup', methods=['GET', 'POST'])
