@@ -3,7 +3,7 @@
   <component name="FacetManager">
     <facet type="google-appengine-python" name="Google App Engine (Python)">
       <configuration>
-        <option name="rootFolder" value="$MODULE_DIR$" />
+        <option name="rootFolder" value="C:\Users\Abe\Desktop\GIT\10 foto-90130f823e85fe04af4c505dac2b9f343ee952cc\Instagram Replica (PaaS application) - Fotogram 1.0" />
         <option name="sdkFolder" value="$USER_HOME$/Downloads/google-cloud-sdk/platform/google_appengine" />
       </configuration>
     </facet>
@@ -16,6 +16,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Google App Engine SDK" level="project" />
+  </component>
+  <component name="PackageRequirementsSettings">
+    <option name="versionSpecifier" value="Strong equality (==x.y.z)" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />

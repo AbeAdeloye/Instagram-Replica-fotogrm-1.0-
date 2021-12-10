@@ -105,6 +105,10 @@ def search():
     Searches the database for users that start with what's queried.
     :return:
     """
+    try:
+        session['user']
+    except:
+        return redirect("/signin")
     if request.method == "GET":
         us = request.values.get('q')
         print(request.values)
@@ -119,6 +123,10 @@ def home():
     Homepage routing and methods
     Renders template home.html
     """
+    try:
+        session['user']
+    except:
+        return redirect("/signin")
     decoded_token = auth.verify_id_token(session['user'])
     uid = decoded_token['uid']
     reconstructposts = {}
@@ -173,6 +181,10 @@ def p():
     Posting methods and routing
     Gets file and uploads
     """
+    try:
+        session['user']
+    except:
+        return redirect("/signin")
     if request.method == "POST":
         title = request.form['title']
         file = request.files
@@ -244,6 +256,10 @@ def postpage(pid):
     :param pid:
     :return rendered template:
     """
+    try:
+        session['user']
+    except:
+        return redirect("/signin")
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         uid = decoded_token['uid']
@@ -285,6 +301,10 @@ def profilepage(uid):
     :param uid:
     :return rendered template of profile.html:
     """
+    try:
+        session['user']
+    except:
+        return redirect("/signin")
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         idd = decoded_token['uid']
@@ -300,8 +320,9 @@ def profilepage(uid):
         flws = followers.get_by_id(uid)
         flin = following.get_by_id(idd)
         if request.method == 'POST':
-            idval = request.form.get('custID').split(".")
-            if idval is not None:
+            idval = request.form.get('custID')
+            if idval != "follow":
+                idval = idval.split(".")
                 idd = str(idval[0])
                 typ = idval[1]
                 print(idd)
@@ -327,22 +348,28 @@ def profilepage(uid):
                         lk.likers.append(uid)
                         lk.likecount += 1
                     lk.put()
-
-            if idd not in flws.get_by_id(uid).f:
-                print("AHA")
-                flws.f.append(idd)
-                flin.f.append(uid)
-                flws.num += 1
-                flin.num += 1
             else:
-                if len(flws.get_by_id(uid).f) > 0:
-                    print("HAH")
-                    flws.f.remove(idd)
-                    flin.f.remove(uid)
-                    flws.num -= 1
-                    flin.num -= 1
-            flws.put()
-            flin.put()
+                if idd not in flws.get_by_id(uid).f:
+                    print("AHA")
+                    flws.f.append(idd)
+                    flin.f.append(uid)
+                    if flws.num is None:
+                        flws.num = 1
+                    else:
+                        flws.num += 1
+                    if flin.num is None:
+                        flin.num = 1
+                    else:
+                        flin.num += 1
+                else:
+                    if len(flws.get_by_id(uid).f) > 0:
+                        print("HAH")
+                        flws.f.remove(idd)
+                        flin.f.remove(uid)
+                        flws.num -= 1
+                        flin.num -= 1
+                flws.put()
+                flin.put()
         if uid == idd:
             return render_template('profile.html', profile=profile, pid=uid, numposts=totalposts, followers=prfolw,
                                    following=prfoli, posts=reconstructposts, user=us, uid=idd)
@@ -362,6 +389,10 @@ def proffollowers(uid):
     :param uid:
     :return:
     """
+    try:
+        session['user']
+    except:
+        return redirect("/signin")
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         idd = decoded_token['uid']
@@ -382,6 +413,10 @@ def proffollowing(uid):
     :param uid:
     :return:
     """
+    try:
+        session['user']
+    except:
+        return redirect("/signin")
     with ds.context():
         decoded_token = auth.verify_id_token(session['user'])
         idd = decoded_token['uid']
@@ -465,4 +500,4 @@ def raise_error(request_object):
 
 
 if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
