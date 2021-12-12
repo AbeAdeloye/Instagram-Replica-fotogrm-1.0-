@@ -52,9 +52,9 @@ def signup():
             uid = user_record.uid
             print(uid)
             with ds.context():  # <- you need this line
-                flr = followers(f=[], id=uid)
-                fli = following(f=[], id=uid)
-                up = uposts(posts=[], id=uid)
+                flr = followers(f=[], num=0, id=uid)
+                fli = following(f=[], num=0, id=uid)
+                up = uposts(posts=[], num=0, id=uid)
                 flr.put()
                 fli.put()
                 up.put()
